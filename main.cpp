@@ -7,7 +7,10 @@
 #define BUFFSIZE        64
 
 BufferedSerial pc(USBTX,USBRX, 115200);
-Zigbee xbee(PB_9,PB_8); // Zigbee module configured with 115200 baud rate - Change in Zigbee.cpp if required.
+Zigbee xbee(PA_9,PA_10); // Zigbee module configured with 9600 baud rate.
+
+AnalogIn ldr(A5);
+PwmOut servo(PB_3);
 
 char buffer[BUFFSIZE]   = {0};
 char msgBuff[BUFFSIZE]  = {0};
@@ -17,6 +20,12 @@ int len                 = 0;
 
 Thread readThread;
 Mutex serialMutex;
+
+void sendValue(float value) {
+    char buffer[32];
+    int len = snprintf(buffer, sizeof(buffer), "%.2f\r\n", value);
+    }
+
 
 void reader()
 {
@@ -52,7 +61,16 @@ int main()
         serialMutex.unlock();
     }
 
+    servo.period(0.020f);
     while (true) {
+        float ldrVoltage = ldr.read() * 3.3;
+        sendValue(ldrVoltage);
+        if (ldrVoltage < 1.3) {
+            float dutyCycle = 0.05 + ldrVoltage / 3.3 * 0.1;
+            servo.write(dutyCycle);
+        }
+        ThisThread::sleep_for(100ms);
+
         len = snprintf(msgBuff, BUFFSIZE, "counter %d", counter);
         xbee.sendMessage(msgBuff);
         counter++;
