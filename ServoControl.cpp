@@ -1,7 +1,9 @@
 #include "mbed.h"
+#include <string>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include "Zigbee.h"
 
 #define BUFFSIZE        64
@@ -33,18 +35,22 @@ void reader()
             printf("LDR value received\n"); //prints messsage to pc to let it know that LDR value has been received.
             if(serialMutex.trylock_for(chrono::milliseconds(500)))
             {
+                if (strcmp(rcvBuff, "0")==0)
+                {
+                    MyServo.pulsewidth_us(MIN);
+                }
                 len = snprintf(msgBuff, BUFFSIZE, "\r\n%s", rcvBuff);
-                MyServo.write(msgBuff, len);
+                //MyServo.write(msgBuff, len);
                 serialMutex.unlock();
 
-                if(strcmp(rcvBuff, "0") == 0)
+                if(rcvBuff, "0")
                 {
                     MyServo.pulsewidth(MIN);
                     printf("Servo at min position");
 
                 }
 
-                if (strcmp(rcvBuff, "1") == 0)
+                if (rcvBuff, "1")
                 {
                     MyServo.pulsewidth(MAX);
                     printf("Servo at max position");
@@ -62,7 +68,7 @@ int main()
         MyServo.pulsewidth(0.001 + offset);
         chrono::milliseconds(50);
     }
-    MyServo.set_format(
+    pc.set_format(
         /* bits */ 8,
         /* parity */ BufferedSerial::None,
         /* stop bit */ 1
