@@ -1,7 +1,7 @@
 #include "Zigbee.h"
 
 Zigbee::Zigbee(PinName tx, PinName rx) : serial(tx, rx) {
-    serial.set_baud(9600); // Set baud rate as per your Zigbee module configuration
+    serial.set_baud(115200); // Set baud rate as per your Zigbee module configuration
 }
 
 Zigbee::~Zigbee() {
